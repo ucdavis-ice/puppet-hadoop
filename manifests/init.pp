@@ -8,11 +8,13 @@ class hadoop {
 	include hadoop::cluster::master
 	include hadoop::cluster::slave
 	
+	#Create the hadoop group
 	group { "hadoop":
 		ensure => present,
 		gid => "800"
 	}
 
+    #Create the hadoop user
 	user { "hduser":
 		ensure => present,
 		comment => "Hadoop",
@@ -24,6 +26,7 @@ class hadoop {
 		require => Group["hadoop"],
 	}
 	
+	#Create the Bash env for the hadoop user
 	file { "/home/hduser/.bash_profile":
 		ensure => present,
 		owner => "hduser",
@@ -32,7 +35,8 @@ class hadoop {
 		content => template("hadoop/home/bash_profile.erb"),
 		require => User["hduser"]
 	}
-		
+	
+	#Ensure the hadoop user home directory	
 	file { "/home/hduser":
 		ensure => "directory",
 		owner => "hduser",
@@ -41,6 +45,8 @@ class hadoop {
 		require => [ User["hduser"], Group["hadoop"] ]
 	}
 
+    #Ensure the hadoop hdfs paths in the params exist and are owned by the group/user
+    #TODO: how to work with subdirectories, should it just be /hadoop or can it be subdir so it's easy to add?
 	file {"$hadoop::params::hdfs_path":
 		ensure => "directory",
 		owner => "hduser",
@@ -49,52 +55,52 @@ class hadoop {
 		require => File["hduser-home"]
 	}
 	
+	#Ensure the hadoop configuration directory exists
 	file {"$hadoop::params::hadoop_base":
 		ensure => "directory",
 		owner => "hduser",
 		group => "hadoop",
 		alias => "hadoop-base",
 	}
+
+   	package { ['gdisk','openjdk-7-jre-headless']:
+		ensure => present,
+		alias => "depends",
+		before => Exec['hadoop-java']
+	}
 	
-	file { "${hadoop::params::hadoop_base}/hadoop-${hadoop::params::version}.tar.gz":
+	exec { "update-java-alternatives":
+		command => "update-java-alternatives -s ${hadoop::params::version}-x86_64.deb",
+		alias => "hadoop-java",
+		refreshonly => true,
+		#user => "hduser", Might not be needed
+		before => File["hadoop-deb"]
+	}
+    #Check that you have the deb package
+	file { "${hadoop::params::hadoop_base}/hadoop_${hadoop::params::version}.deb":
 		mode => 0644,
 		owner => hduser,
 		group => hadoop,
-		source => "puppet:///modules/hadoop/hadoop-${hadoop::params::version}.tar.gz",
-		alias => "hadoop-source-tgz",
-		before => Exec["untar-hadoop"],
-		require => File["hadoop-base"]
+		source => "puppet:///modules/hadoop/hadoop_${hadoop::params::version}.deb",
+		alias => "hadoop-deb",
+		before => Exec["dpkg-hadoop"],
+		require => [ File["hadoop-base"], Package["depends"]] #syntax check?
 	}
 	
-	exec { "untar hadoop-${hadoop::params::version}.tar.gz":
-		command => "tar -zxf hadoop-${hadoop::params::version}.tar.gz",
+	#Install using the offical debs from the Apache hadoop site, works on all flavors of debian
+	exec { "dpkg hadoop_${hadoop::params::version}.deb":
+		command => "dpkg -i hadoop_${hadoop::params::version}.deb",
 		cwd => "${hadoop::params::hadoop_base}",
-		creates => "${hadoop::params::hadoop_base}/hadoop-${hadoop::params::version}",
-		alias => "untar-hadoop",
+		alias => "dpkg-hadoop",
 		refreshonly => true,
-		subscribe => File["hadoop-source-tgz"],
+		subscribe => File["hadoop-deb"],
 		user => "hduser",
-		before => [ File["hadoop-symlink"], File["hadoop-app-dir"]]
+		#before => [ File["hadoop-symlink"], File["hadoop-app-dir"]]
 	}
-	file { "${hadoop::params::hadoop_base}/hadoop-${hadoop::params::version}":
-		ensure => "directory",
-		mode => 0644,
-		owner => "hduser",
-		group => "hadoop",
-		alias => "hadoop-app-dir"
-	}
-		
-	file { "${hadoop::params::hadoop_base}/hadoop":
-		force => true,
-		ensure => "${hadoop::params::hadoop_base}/hadoop-${hadoop::params::version}",
-		alias => "hadoop-symlink",
-		owner => "hduser",
-		group => "hadoop",
-		require => File["hadoop-source-tgz"],
-		before => [ File["core-site-xml"], File["hdfs-site-xml"], File["mapred-site-xml"], File["hadoop-env-sh"]]
-	}
+    
 	
-	file { "${hadoop::params::hadoop_base}/hadoop-${hadoop::params::version}/conf/core-site.xml":
+	#Add the configuration based on templates
+	file { "${hadoop::params::hadoop_base}/core-site.xml":
 		owner => "hduser",
 		group => "hadoop",
 		mode => "644",
@@ -102,7 +108,7 @@ class hadoop {
 		content => template("hadoop/conf/core-site.xml.erb"),
 	}
 	
-	file { "${hadoop::params::hadoop_base}/hadoop-${hadoop::params::version}/conf/hdfs-site.xml":
+	file { "${hadoop::params::hadoop_base}/hdfs-site.xml":
 		owner => "hduser",
 		group => "hadoop",
 		mode => "644",
@@ -110,7 +116,7 @@ class hadoop {
 		content => template("hadoop/conf/hdfs-site.xml.erb"),
 	}
 	
-	file { "${hadoop::params::hadoop_base}/hadoop-${hadoop::params::version}/conf/hadoop-env.sh":
+	file { "${hadoop::params::hadoop_base}/hadoop-env.sh":
 		owner => "hduser",
 		group => "hadoop",
 		mode => "644",
@@ -118,7 +124,7 @@ class hadoop {
 		content => template("hadoop/conf/hadoop-env.sh.erb"),
 	}
 	
-	exec { "${hadoop::params::hadoop_base}/hadoop-${hadoop::params::version}/bin/hadoop namenode -format":
+	exec { "hadoop namenode -format":
 		user => "hduser",
 		alias => "format-hdfs",
 		refreshonly => true,
@@ -126,7 +132,7 @@ class hadoop {
 		require => [ File["hadoop-symlink"], File["java-app-dir"], File["hduser-bash_profile"], File["mapred-site-xml"], File["hdfs-site-xml"], File["core-site-xml"], File["hadoop-env-sh"]]
 	}
 	
-	file { "${hadoop::params::hadoop_base}/hadoop-${hadoop::params::version}/conf/mapred-site.xml":
+	file { "${hadoop::params::hadoop_base}/mapred-site.xml":
 		owner => "hduser",
 		group => "hadoop",
 		mode => "644",

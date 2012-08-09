@@ -1,38 +1,47 @@
 # /etc/puppet/modules/hadoop/manifests/params.pp
 
 class hadoop::params {
-
-	include java::params
+    
+    #Where do the java params come from?
+	#include java::params
 
 	$version = $::hostname ? {
-		default			=> "0.20.203.0",
+		default			=> "1.0.3-1_x86_64",
 	}
         
 	$master = $::hostname ? {
-		default			=> "hadoop01",
+		default			=> "ice1",
 	}
         
 	$slaves = $::hostname ? {
-		default			=> [hadoop01, hadoop-02, hadoop-03] 
+		default			=> [ice1, ice2] 
 	}
 	$hdfsport = $::hostname ? {
 		default			=> "8020",
 	}
 
 	$replication = $::hostname ? {
-		default			=> "3",
+		default			=> "2",
 	}
 
 	$jobtrackerport = $::hostname ? {
 		default			=> "8021",
 	}
+	
+	$java_base =  $::hostname ? {
+		default			=> "/usr/lib/jvm",
+	}
+	$java_version =  $::hostname ? {
+		default			=> "java-1.7.0-openjdk",
+	}
+	
 	$java_home = $::hostname ? {
-		default			=> "${java::params::java_base}/jdk${java::params::java_version}",
+		default			=> "${params::java_base}/${params::java_version}",
 	}
 	$hadoop_base = $::hostname ? {
-		default			=> "/opt/hadoop",
+		default			=> "/etc/hadoop",
 	}
 	$hdfs_path = $::hostname ? {
-		default			=> "/home/hduser/hdfs",
+		default			=> "/hadoop/disk1,/hadoop/disk2",
 	}
 }

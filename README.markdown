@@ -4,7 +4,7 @@ This module was created to assist with the installation and configuration of had
 
 # Configuration #
 
-* A tar.gz file needs to be placed into ~/modules/hadoop/files. You can download hadoop from here: http://hadoop.apache.org/common/releases.html
+* A deb file needs to be placed into ~/modules/hadoop/files. You can download hadoop from here: http://hadoop.apache.org/common/releases.html
 * Once downloaded the params.pp file needs to be updated with the version downloaded. 
 * The params.pp also requires the java module I have already published. That or the $java_home variable needs to be properly updated.
 
@@ -14,13 +14,17 @@ The ssh keys for the hduser are in ~/files/ssh/ make sure you edit these files a
 
 # Cluster Mode #
 
-Currently the configuration is setup for a cluster with atleast 3 nodes. Each node needs to be named in params.pp the first node should be defined as $master and the other two nodes should be defined as $slaves.
+Currently the configuration is setup for a cluster with at least 2 nodes. Each node needs to be named in params.pp the first node should be defined as $master and the other two nodes should be defined as $slaves.
 
 If adding more then 3 nodes up $replication value to the number of total nodes in your cluster. Also add each node to the $slaves variable. 
 
 
 # Author #
+* Alex Mandel
+* http://ice.ucdavis.edu
 
+# Credits #
+Based on work originally by
 * Brian Carpio
 * http://www.thetek.net
 * http://www.linkedin.com/in/briancarpio
