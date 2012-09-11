@@ -16,6 +16,15 @@ class hadoop::params {
 	$slaves = $::hostname ? {
 		default			=> [ice1, ice2] 
 	}
+	
+	$backupaddress = $::hostname ? {
+	    default     => "192.168.167.49:50100"
+	}
+	
+	$backupaddresshttp = $::hostname ? {
+	    default     => "192.168.167.49:50105"
+	}
+	
 	$hdfsport = $::hostname ? {
 		default			=> "8020",
 	}
