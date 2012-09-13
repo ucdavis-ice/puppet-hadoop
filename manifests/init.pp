@@ -13,7 +13,6 @@ class hadoop {
 	#Create the hadoop group
 	group { "hadoop":
 		ensure => present,
-		gid => "800"
 	}
 
     #Create the hadoop user
@@ -109,7 +108,7 @@ class hadoop {
 		alias => "dpkg-hadoop",
 		refreshonly => true,
 		subscribe => File["hadoop-deb"],
-		user => "hduser",
+		#user => "hduser",
 		#before => [ File["hadoop-symlink"], File["hadoop-app-dir"]]
 	}
     
