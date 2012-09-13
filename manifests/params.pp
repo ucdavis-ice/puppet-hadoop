@@ -51,6 +51,6 @@ class hadoop::params {
 		default			=> "/etc/hadoop",
 	}
 	$hdfs_path = $::hostname ? {
-		default			=> "/hadoop/disk1","/hadoop/disk2",
+		default			=> "/hadoop/disk1"
 	}
 }
