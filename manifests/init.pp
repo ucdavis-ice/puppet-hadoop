@@ -7,6 +7,8 @@ class hadoop {
 
 	include hadoop::cluster::master
 	include hadoop::cluster::slave
+
+    Exec { path => '/usr/bin:/bin:/usr/sbin:/sbin' }
 	
 	#Create the hadoop group
 	group { "hadoop":
@@ -45,6 +47,13 @@ class hadoop {
 		require => [ User["hduser"], Group["hadoop"] ]
 	}
 
+    file { "/hadoop":
+		ensure => "directory",
+		owner => "hduser",
+		group => "hadoop",
+		alias => "hdfs-path",
+		require => [ User["hduser"], Group["hadoop"] ]
+	}
     #Ensure the hadoop hdfs paths in the params exist and are owned by the group/user
     #TODO: how to work with subdirectories, should it just be /hadoop or can it be subdir so it's easy to add?
 	file {"$hadoop::params::hdfs_path":
@@ -52,7 +61,7 @@ class hadoop {
 		owner => "hduser",
 		group => "hadoop",
 		alias => "hdfs-dir",
-		require => File["hduser-home"]
+		require => File["hdfs-path"]
 	}
 	
 	#Ensure the hadoop configuration directory exists
@@ -63,14 +72,21 @@ class hadoop {
 		alias => "hadoop-base",
 	}
 
-   	package { ['gdisk','openjdk-7-jre-headless']:
+
+   	package { ['gdisk']:
 		ensure => present,
-		alias => "depends",
+		alias => "gdisk",
+		before => Exec['hadoop-java']
+	}
+	
+	package { ['openjdk-7-jre-headless']:
+		ensure => present,
+		alias => "openjdk",
 		before => Exec['hadoop-java']
 	}
 	
 	exec { "update-java-alternatives":
-		command => "update-java-alternatives -s ${hadoop::params::version}-x86_64.deb",
+		command => "/usr/sbin/update-java-alternatives -s ${hadoop::params::version}-x86_64.deb",
 		alias => "hadoop-java",
 		refreshonly => true,
 		#user => "hduser", Might not be needed
@@ -84,7 +100,7 @@ class hadoop {
 		source => "puppet:///modules/hadoop/hadoop_${hadoop::params::version}.deb",
 		alias => "hadoop-deb",
 		before => Exec["dpkg-hadoop"],
-		require => [ File["hadoop-base"], Package["depends"]] #syntax check?
+		require => [ File["hadoop-base"], Package["gdisk"],Package["openjdk"] ] #syntax check?
 	}
 	
 	#Install using the offical debs from the Apache hadoop site, works on all flavors of debian
@@ -125,11 +141,12 @@ class hadoop {
 	}
 	
 	exec { "hadoop namenode -format":
+	    path    => ["/usr/bin", "/usr/sbin","${hadoop::params::hadoop_base}/hadoop_bin"],
 		user => "hduser",
 		alias => "format-hdfs",
 		refreshonly => true,
 		subscribe => File["hdfs-dir"],
-		require => [ File["hadoop-symlink"], File["java-app-dir"], File["hduser-bash_profile"], File["mapred-site-xml"], File["hdfs-site-xml"], File["core-site-xml"], File["hadoop-env-sh"]]
+		require => [ File["hduser-bash_profile"], File["mapred-site-xml"], File["hdfs-site-xml"], File["core-site-xml"], File["hadoop-env-sh"]]
 	}
 	
 	file { "${hadoop::params::hadoop_base}/mapred-site.xml":
