@@ -72,7 +72,6 @@ class hadoop {
 		alias => "hadoop-base",
 	}
 
-
    	package { ['gdisk']:
 		ensure => present,
 		alias => "gdisk",

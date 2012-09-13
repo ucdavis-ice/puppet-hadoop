@@ -45,7 +45,7 @@ class hadoop::params {
 	}
 	
 	$java_home = $::hostname ? {
-		default			=> "${params::java_base}/${params::java_version}",
+		default			=> "${params::java_base}/${params::java_version}-amd64",
 	}
 	$hadoop_base = $::hostname ? {
 		default			=> "/etc/hadoop",

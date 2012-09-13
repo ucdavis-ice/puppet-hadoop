@@ -7,7 +7,7 @@
   <description>A base for other temporary directories.</description>
 </property>
 <property>
-  <name>fs.defaultFS</name>
+  <name>fs.default.name</name>
   <value>hdfs://<%= scope.lookupvar('hadoop::params::master') %>:<%= scope.lookupvar('hadoop::params::hdfsport') %></value>
   <description>The name of the default file system.  A URI whose
   scheme and authority determine the FileSystem implementation.  The
