@@ -88,29 +88,36 @@ class hadoop {
 		alias => "hadoop-java",
 		refreshonly => true,
 		#user => "hduser", Might not be needed
-		before => File["hadoop-deb"]
+		before => File["dpkg-hadoop"]
 	}
-    #Check that you have the deb package
-	file { "${hadoop::params::hadoop_base}/hadoop_${hadoop::params::version}.deb":
-		mode => 0644,
-		owner => hduser,
-		group => hadoop,
-		source => "puppet:///modules/hadoop/hadoop_${hadoop::params::version}.deb",
-		alias => "hadoop-deb",
-		before => Exec["dpkg-hadoop"],
-		require => [ File["hadoop-base"], Package["gdisk"],Package["openjdk"] ] #syntax check?
-	}
+    #Check that you have the deb package, might not be needed now
+	#file { "${hadoop::params::hadoop_base}/hadoop_${hadoop::params::version}.deb":
+	#	mode => 0644,
+	#	owner => hduser,
+	#	group => hadoop,
+	#	source => "puppet:///modules/hadoop/hadoop_${hadoop::params::version}.deb",
+	#	alias => "hadoop-deb",
+	#	before => Exec["dpkg-hadoop"],
+	#	require => [ File["hadoop-base"], Package["gdisk"],Package["openjdk"] ] #syntax check?
+	#}
 	
-	#Install using the offical debs from the Apache hadoop site, works on all flavors of debian
-	exec { "dpkg hadoop_${hadoop::params::version}.deb":
-		command => "dpkg -i hadoop_${hadoop::params::version}.deb",
-		cwd => "${hadoop::params::hadoop_base}",
-		alias => "dpkg-hadoop",
-		refreshonly => true,
-		subscribe => File["hadoop-deb"],
-		#user => "hduser",
-		#before => [ File["hadoop-symlink"], File["hadoop-app-dir"]]
+	#Install using the offical debs from the Apache hadoop site, works on all flavors of debian, better use the package manager
+	package { 'hadoop':
+	    ensure => installed,
+	    provider => 'dpkg',
+	    source => "puppet:///modules/hadoop/hadoop_${hadoop::params::version}.deb",
+	    #Should source use the puppet file reference?
+	    alias => "dpkg-hadoop",
+	    require => Exec["update-java-alternatives"],
 	}
+	#exec { "dpkg hadoop_${hadoop::params::version}.deb":
+		#command => "dpkg -i hadoop_${hadoop::params::version}.deb",
+		#cwd => "${hadoop::params::hadoop_base}",
+		#alias => "dpkg-hadoop",
+		#refreshonly => true,
+		#subscribe => File["hadoop-deb"],
+		#before => [ File["hadoop-symlink"], File["hadoop-app-dir"]]
+	#}
     
 	
 	#Add the configuration based on templates
