@@ -97,7 +97,7 @@ class hadoop {
 		group => hadoop,
 		source => "puppet:///modules/hadoop/hadoop_${hadoop::params::version}.deb",
 		alias => "hadoop-deb",
-		before => Exec["dpkg-hadoop"],
+		before => Package["dpkg-hadoop"],
 		require => [ File["hadoop-base"], Package["gdisk"],Package["openjdk"] ] #syntax check?
 	}
 	
