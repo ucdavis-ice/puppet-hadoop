@@ -79,7 +79,7 @@ class hadoop {
 		before => Exec['hadoop-java']
 	}
 	
-	package { ['openjdk-7-jre-headless']:
+	package { ['openjdk-7-jdk']:
 		ensure => present,
 		alias => "openjdk",
 		before => Exec['hadoop-java']

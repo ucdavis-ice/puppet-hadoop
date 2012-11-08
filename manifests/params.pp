@@ -22,11 +22,11 @@ class hadoop::params {
 	}
 	
 	$backupaddress = $::hostname ? {
-	    default     => "192.168.1.125:50100"
+	    default     => "${params::secondary}:50100"
 	}
 	
 	$backupaddresshttp = $::hostname ? {
-	    default     => "192.168.1.125:50105"
+	    default     => "${params::secondary}:50105"
 	}
 	
 	$hdfsport = $::hostname ? {

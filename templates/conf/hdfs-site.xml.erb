@@ -10,6 +10,18 @@
   </description>
 </property>
 <property>
+    <name>dfs.namenode.name.dir</name>
+    <value><%= scope.lookupvar('hadoop::params::hdfs_path') %></value>
+</property>
+<property>
+    <name>dfs.namenode.checkpoint.dir</name>
+    <value><%= scope.lookupvar('hadoop::params::hdfs_path') %></value>
+</property>
+<property>
+    <name>dfs.datanode.data.dir</name>
+    <value><%= scope.lookupvar('hadoop::params::hdfs_path') %></value>
+</property>
+<property>
   <name>dfs.namenode.backup.address</name>
   <value><%= scope.lookupvar('hadoop::params::backupaddress') %></value>
   <description>	The backup node server address and port. 

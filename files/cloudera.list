@@ -1,0 +1,6 @@
+#https://ccp.cloudera.com/display/CDH4DOC/CDH4+Installation#CDH4Installation-AddingaDebianRepository
+deb [arch=amd64] http://archive.cloudera.com/cdh4/ubuntu/precise/amd64/cdh precise-cdh4 contrib
+deb-src http://archive.cloudera.com/cdh4/ubuntu/precise/amd64/cdh precise-cdh4 contrib
+
+
+#curl -s http://archive.cloudera.com/cdh4/ubuntu/precise/amd64/cdh/archive.key | sudo apt-key add -
