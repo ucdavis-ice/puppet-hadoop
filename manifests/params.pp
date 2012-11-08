@@ -5,24 +5,28 @@ class hadoop::params {
     #Where do the java params come from?
 	#include java::params
 
-	$version = $::hostname ? {
-		default			=> "1.0.3-1_x86_64",
-	}
+	#$version = $::hostname ? {
+	#	default			=> "1.0.3-1_x86_64",
+	#}
         
-	$master = $::hostname ? {
-		default			=> "ice1",
+	$namenode = $::hostname ? {
+		default     => "h1",
 	}
-        
-	$slaves = $::hostname ? {
-		default			=> [ice1, ice2] 
+    
+    $secondary = $::hostname ? {
+        default     => "h2",
+    }
+    
+	$datanodes = $::hostname ? {
+		default		=> [h1, h2] 
 	}
 	
 	$backupaddress = $::hostname ? {
-	    default     => "192.168.167.49:50100"
+	    default     => "192.168.1.125:50100"
 	}
 	
 	$backupaddresshttp = $::hostname ? {
-	    default     => "192.168.167.49:50105"
+	    default     => "192.168.1.125:50105"
 	}
 	
 	$hdfsport = $::hostname ? {

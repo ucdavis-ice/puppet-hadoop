@@ -1,12 +1,14 @@
 # /etc/puppet/modules/hadoop/manafests/init.pp
+# Rewritten to use cloudera packages CDH4
 
 class hadoop {
 
 	require hadoop::params
 	require hadoop::cluster
 
-	include hadoop::cluster::master
-	include hadoop::cluster::slave
+	include hadoop::cluster::namenode
+	include hadoop::cluster::secondary
+	include hadoop::cluster::datanodes
 
     Exec { path => '/usr/bin:/bin:/usr/sbin:/sbin' }
 	
@@ -16,19 +18,19 @@ class hadoop {
 	}
 
     #Create the hadoop user
-	user { "hduser":
+	user { "hdfs":
 		ensure => present,
 		comment => "Hadoop",
 		password => "!!",
 		uid => "800",
 		gid => "800",
 		shell => "/bin/bash",
-		home => "/home/hduser",
+		home => "/home/hdfs",
 		require => Group["hadoop"],
 	}
 	
 	#Create the Bash env for the hadoop user
-	file { "/home/hduser/.bash_profile":
+	file { "/home/hdfs/.bash_profile":
 		ensure => present,
 		owner => "hduser",
 		group => "hadoop",
@@ -162,38 +164,5 @@ class hadoop {
 		content => template("hadoop/conf/mapred-site.xml.erb"),		
 	}
 	
-	file { "/home/hduser/.ssh/":
-		owner => "hduser",
-		group => "hadoop",
-		mode => "700",
-		ensure => "directory",
-		alias => "hduser-ssh-dir",
-	}
-	
-	file { "/home/hduser/.ssh/id_rsa.pub":
-		ensure => present,
-		owner => "hduser",
-		group => "hadoop",
-		mode => "644",
-		source => "puppet:///modules/hadoop/ssh/id_rsa.pub",
-		require => File["hduser-ssh-dir"],
-	}
-	
-	file { "/home/hduser/.ssh/id_rsa":
-		ensure => present,
-		owner => "hduser",
-		group => "hadoop",
-		mode => "600",
-		source => "puppet:///modules/hadoop/ssh/id_rsa",
-		require => File["hduser-ssh-dir"],
-	}
-	
-	file { "/home/hduser/.ssh/authorized_keys":
-		ensure => present,
-		owner => "hduser",
-		group => "hadoop",
-		mode => "644",
-		source => "puppet:///modules/hadoop/ssh/id_rsa.pub",
-		require => File["hduser-ssh-dir"],
-	}	
+
 }

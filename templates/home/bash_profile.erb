@@ -8,6 +8,9 @@ export HADOOP_HOME=<%= scope.lookupvar('hadoop::params::hadoop_base') %>
 # Set JAVA_HOME (we will also configure JAVA_HOME directly for Hadoop later on)
 export JAVA_HOME=<%= scope.lookupvar('hadoop::params::java_home') %>
 
+# Add libjvm.so to LD_Library so hdfs fuse works right
+export LD_LIBRARY_PATH=<%= scope.lookupvar ('hadoop::params::hadoop_libjvm') %>:${LD_LIBRARY_PATH}
+
 # Some convenient aliases and functions for running Hadoop-related commands
 unalias fs &> /dev/null
 alias fs="hadoop fs"
