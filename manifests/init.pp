@@ -13,7 +13,7 @@ class hadoop {
     Exec { path => '/usr/bin:/bin:/usr/sbin:/sbin' }
 	
 	#Create the hadoop group
-	group { "hadoop":
+	group { "hdfs":
 		ensure => present,
 	}
 
@@ -26,24 +26,24 @@ class hadoop {
 		gid => "800",
 		shell => "/bin/bash",
 		home => "/home/hdfs",
-		require => Group["hadoop"],
+		require => Group["hdfs"],
 	}
 	
 	#Create the Bash env for the hadoop user
 	file { "/home/hdfs/.bash_profile":
 		ensure => present,
-		owner => "hduser",
+		owner => "hdfs",
 		group => "hadoop",
-		alias => "hduser-bash_profile",
+		alias => "hdfs-bash_profile",
 		content => template("hadoop/home/bash_profile.erb"),
 		require => User["hduser"]
 	}
 	
 	#Ensure the hadoop user home directory	
-	file { "/home/hduser":
+	file { "/home/hdfs":
 		ensure => "directory",
-		owner => "hduser",
-		group => "hadoop",
+		owner => "hdfs",
+		group => "hdfs",
 		alias => "hduser-home",
 		require => [ User["hduser"], Group["hadoop"] ]
 	}
@@ -112,15 +112,6 @@ class hadoop {
 	    alias => "dpkg-hadoop",
 	    require => [File["hadoop-deb"],Exec["update-java-alternatives"] ]
 	}
-	#exec { "dpkg hadoop_${hadoop::params::version}.deb":
-		#command => "dpkg -i hadoop_${hadoop::params::version}.deb",
-		#cwd => "${hadoop::params::hadoop_base}",
-		#alias => "dpkg-hadoop",
-		#refreshonly => true,
-		#subscribe => File["hadoop-deb"],
-		#before => [ File["hadoop-symlink"], File["hadoop-app-dir"]]
-	#}
-    
 	
 	#Add the configuration based on templates
 	file { "${hadoop::params::hadoop_base}/core-site.xml":

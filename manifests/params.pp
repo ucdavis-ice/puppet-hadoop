@@ -52,7 +52,7 @@ class hadoop::params {
 		default			=> "${params::java_base}/${params::java_version}-amd64",
 	}
 	$hadoop_base = $::hostname ? {
-		default			=> "/etc/hadoop",
+		default			=> "/etc/hadoop/conf.ice",
 	}
 	$hdfs_path = $::hostname ? {
 		default			=> "/hadoop/disk1"
